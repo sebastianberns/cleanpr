@@ -93,7 +93,7 @@ class PR:
             features = self.cf.compute_features_from_samples(input, **kwargs)
         elif isinstance(input, nn.Module):  # Generator model
             features = self.cf.compute_features_from_generator(input, **kwargs)
-        elif isinstance(input, Dataset):  # Data set
+        elif isinstance(input, Dataset):  # Dataset
             features, targets = self.cf.compute_features_from_dataset(input, **kwargs)
         else:
             raise ValueError(f"Input type {type(input)} is not supported")
@@ -102,11 +102,23 @@ class PR:
 
 
     """
+    Compute radii given a data source
+        features (ndarray [N x M]): matrix of data features 
+            where rows are observations and columns are variables
+    Return vector of radii (ndarray [N]) for every observation
+    """
+    def compute_radii(self, features: np.ndarray) -> np.ndarray:
+        distances = self.compute_pairwise_distances(features)
+        radii = self.distances2radii(distances, k=self.k)
+        return radii
+
+
+    """
     Compute Precision and Recall metric
         manifold (Manifold): reference set of samples to test against
         subjects (Manifold): set of samples to evaluate
-            For precision, 'manifold' is the data set and 'subjects' the generated samples
-            For recall, 'manifold' is the generated samples and 'subjects' the data set
+            For precision, 'manifold' is the dataset and 'subjects' the generated samples
+            For recall, 'manifold' is the generated samples and 'subjects' the dataset
     Return ratio of subject samples that are covered by the manifold relative to the total number of samples
     """
     def compute_metric(self, manifold: Manifold, subjects: Manifold) -> float:
