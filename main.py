@@ -69,7 +69,7 @@ class PR:
     def get_manifold(self, input: Union[Tensor, nn.Module, Dataset], **kwargs) -> Manifold:
         features = self.compute_features(input, **kwargs)
         distances = self.compute_pairwise_distances(features)
-        radii = self.distances2radii(distances, k=self.k)
+        radii = self.distances2radii(distances)
         return Manifold(features, radii)
 
 
@@ -109,7 +109,7 @@ class PR:
     """
     def compute_radii(self, features: np.ndarray) -> np.ndarray:
         distances = self.compute_pairwise_distances(features)
-        radii = self.distances2radii(distances, k=self.k)
+        radii = self.distances2radii(distances)
         return radii
 
 
@@ -178,7 +178,9 @@ class PR:
         k (int): k-nearest neighbor parameter
     Return vector of radii (ndarray [N])
     """
-    def distances2radii(self, distances: np.ndarray, k: int) -> np.ndarray:
+    def distances2radii(self, distances: np.ndarray, k: Optional[int] = None) -> np.ndarray:
+        if k is None:
+            k = self.k
         num_features = distances.shape[0]
         radii = np.zeros(num_features)
         for i in range(num_features):
