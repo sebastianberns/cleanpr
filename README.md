@@ -112,6 +112,17 @@ coverage = measure.compute_metric(manifold, subjects)
 - `manifold` (Manifold): reference manifold to test against
 - `subjects` (Manifold): manifold to evaluate
 
+#### compute_coverage
+
+Compute the manifold coverage, either for the Precision or Recall metric. For precision, 'radii' is the dataset radii. For recall, 'radii' is the generated samples radii.
+
+```python
+coverage = measure.compute_coverage(manifold.radii, distances)
+```
+
+- `radii` (numpy.ndarray): radii of samples in reference manifold
+- `distances` (numpy.ndarray): pairwise distances between samples in reference manifold and subjects
+
 #### compute_pairwise_distances
 
 ##### Data source-specific arguments

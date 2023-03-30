@@ -130,11 +130,11 @@ class PR:
         return coverage
 
     """
-    Compute individual metric, either Precision or Recall
+    Compute manifold coverage, either for the Precision or Recall metric
     For precision, 'radii' is the dataset radii
     For recall, 'radii' is the generated samples radii
         radii (Manifold): radii of samples in reference manifold
-        distannces (Manifold): set of samples to evaluate
+        distances (Manifold): pairwise distances between samples in reference manifold and subjects
     Return ratio of subject samples that are covered by the manifold relative to the total number of samples
     """
 
