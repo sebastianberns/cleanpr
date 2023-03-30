@@ -53,8 +53,11 @@ class PR:
 
         input_manifold = self.get_manifold(input, **kwargs)
 
-        precision = self.compute_metric(self.data_manifold, input_manifold)
-        recall = self.compute_metric(input_manifold, self.data_manifold)
+        # Pair-wise distances between data and input manifolds
+        distances = self.compute_pairwise_distances(self.data_manifold.features, input_manifold.features)
+
+        precision = self.compute_coverage(self.data_manifold.radii, distances)
+        recall = self.compute_coverage(input_manifold.radii, distances)
         return precision, recall
 
     __call__ = precision_recall
@@ -114,19 +117,34 @@ class PR:
 
 
     """
-    Compute Precision and Recall metric
+    Compute individual metric, either Precision or Recall
+    For precision, 'manifold' is the dataset and 'subjects' the generated samples
+    For recall, 'manifold' is the generated samples and 'subjects' the dataset
         manifold (Manifold): reference set of samples to test against
         subjects (Manifold): set of samples to evaluate
-            For precision, 'manifold' is the dataset and 'subjects' the generated samples
-            For recall, 'manifold' is the generated samples and 'subjects' the dataset
     Return ratio of subject samples that are covered by the manifold relative to the total number of samples
     """
     def compute_metric(self, manifold: Manifold, subjects: Manifold) -> float:
-        N = subjects.features.shape[0]  # Number of items
+        distances = self.compute_pairwise_distances(manifold.features, subjects.features)  # Pair-wise distances
+        coverage = self.compute_coverage(manifold.radii, distances)
+        return coverage
+
+    """
+    Compute individual metric, either Precision or Recall
+    For precision, 'radii' is the dataset radii
+    For recall, 'radii' is the generated samples radii
+        radii (Manifold): radii of samples in reference manifold
+        distannces (Manifold): set of samples to evaluate
+    Return ratio of subject samples that are covered by the manifold relative to the total number of samples
+    """
+
+    def compute_coverage(self, radii: np.ndarray, distances: np.ndarray) -> float:
+        N = distances.shape[0]  # Number of items
         count = 0  # Counter
-        dist = self.compute_pairwise_distances(manifold.features, subjects.features)  # Pair-wise distances
         for i in range(N):  # For all items
-            count += (dist[:, i] < manifold.radii).any()  # Is the item within the radius of any other item?
+            # Is the item within the radius of any other item?
+            # if true add 1 to the counter
+            count += np.any(distances[i, :] < radii).astype(int)
         coverage = count / N  # Coverage ratio: amount of items that fall into the manifold
         return coverage
 
